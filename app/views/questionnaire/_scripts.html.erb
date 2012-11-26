@@ -1,5 +1,9 @@
 <script type="text/javascript">
 num_questions = <%= [@questionnaire.questions.length,1].max %>;
+var aMail = new Array();
+<% all_questions = Question.all.map {|n| n.txt} %>
+aMail = <%= all_questions.to_json %>;
+aMail.sort();
 
 function deleteQuestions(){
 	var checkedObjArray = new Array();
@@ -21,7 +25,7 @@ function deleteQuestions(){
 
 function addQuestions(){
 	numQuestionsToAdd = parseInt(document.getElementById("numQuestionsToAdd").value);
-	for(i=0; i<numQuestionsToAdd; i++){
+    for(i=0; i<numQuestionsToAdd; i++){
 		addQuestion();
 	}
 }
@@ -36,7 +40,7 @@ function addQuestion(){
 	row.appendChild(column);
 	
 	column = document.createElement("td");
-	column.innerHTML = "<input id=new_question_" + id + "_txt name=new_question[" + id + "][txt] size=70 type=text/>";
+	column.innerHTML = "<input onkeyup='Complete(this, event)' id=new_question_" + id + "_txt name=new_question[" + id + "][txt] size=70 type=text />";
 	row.appendChild(column);
 	
 	column = document.createElement("td");
@@ -72,5 +76,57 @@ function addQuestion(){
 	column.innerHTML = weights;
 	row.appendChild(column);
 	num_questions = num_questions + 1;
+}
+function Complete(obj, evt) {
+    if ((!obj) || (!evt) || (aMail.length == 0)) {
+        return;
+    }
+
+    if (obj.value.length == 0) {
+        return;
+    }
+
+    var elm = (obj.setSelectionRange) ? evt.which : evt.keyCode;
+
+    if ((elm < 32) || (elm >= 33 && elm <= 46) || (elm >= 112 && elm <= 123)) {
+        return;
+    }
+
+    var txt = obj.value.replace(/;/gi, ",");
+    elm = txt.split(",");
+    txt = elm.pop();
+    txt = txt.replace(/^\s*/, "");
+
+    if (txt.length == 0) {
+        return;
+    }
+
+    if (obj.createTextRange) {
+        var rng = document.selection.createRange();
+        if (rng.parentElement() == obj) {
+            elm = rng.text;
+            var ini = obj.value.lastIndexOf(elm);
+        }
+    } else if (obj.setSelectionRange) {
+        var ini = obj.selectionStart;
+    }
+
+    for (var i = 0; i < aMail.length; i++) {
+        elm = aMail[i].toString();
+
+        if (elm.toLowerCase().indexOf(txt.toLowerCase()) == 0) {
+            obj.value += elm.substring(txt.length, elm.length);
+            break;
+        }
+    }
+
+    if (obj.createTextRange) {
+        rng = obj.createTextRange();
+        rng.moveStart("character", ini);
+        rng.moveEnd("character", obj.value.length);
+        rng.select();
+    } else if (obj.setSelectionRange) {
+        obj.setSelectionRange(ini, obj.value.length);
+    }
 }
 </script>
