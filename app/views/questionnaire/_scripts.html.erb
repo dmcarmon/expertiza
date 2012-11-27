@@ -1,8 +1,13 @@
 <script type="text/javascript">
 num_questions = <%= [@questionnaire.questions.length,1].max %>;
 var aMail = new Array();
-<% all_questions = Question.all.map {|n| n.txt} %>
-aMail = <%= all_questions.to_json %>;
+<% questionnaires = Questionnaire.find_all_by_type(@questionnaire.type) %>
+<% for que in questionnaires %>
+<% all_questions = Question.find_all_by_questionnaire_id(que.id).map {|n| n.txt} %>
+<% for q in all_questions %>
+aMail.push(<%= q.to_json %>);
+<% end %>
+<% end %>
 aMail.sort();
 
 function deleteQuestions(){
