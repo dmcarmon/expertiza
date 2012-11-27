@@ -92,8 +92,8 @@ function Complete(obj, evt) {
         return;
     }
 
-    var txt = obj.value.replace(/;/gi, ",");
-    elm = txt.split(",");
+    var txt = obj.value;
+    elm = txt.split("?");
     txt = elm.pop();
     txt = txt.replace(/^\s*/, "");
 
